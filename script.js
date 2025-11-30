@@ -13,6 +13,12 @@ const filterCategoryEl = document.getElementById('filter-category');
 const filterMonthEl = document.getElementById('filter-month');
 const submitBtn = document.querySelector('.btn-submit');
 
+// --- FUNGSI BARU: MENYIMPAN KE LOCAL STORAGE ---
+function saveTransactionsToLocalStorage() {
+    // Menyimpan array 'transactions' ke Local Storage setelah dikonversi ke string JSON
+    localStorage.setItem('transactions', JSON.stringify(transactions));
+}
+
 const formatRupiah = (number) => {
     return new Intl.NumberFormat('id-ID', {
         style: 'currency',
@@ -37,8 +43,9 @@ function addTransaction(e) {
         return;
     }
 
-   
+    
     if (isEditing) {
+        // updateTransaction sekarang memanggil saveTransactionsToLocalStorage di dalamnya
         updateTransaction(currentEditId, { type, category, paymentMethod, amount: +amount, date, description });
     } else {
         const newTransaction = {
@@ -52,6 +59,9 @@ function addTransaction(e) {
         };
         transactions.push(newTransaction);
         showFeedback('Transaksi berhasil ditambahkan!', true);
+        
+        // Simpan ke Local Storage setelah penambahan
+        saveTransactionsToLocalStorage(); 
     }
     
     resetForm();
@@ -140,6 +150,10 @@ function deleteTransaction(id) {
     if (confirm("Apakah Anda yakin ingin menghapus transaksi ini?")) {
         transactions = transactions.filter(t => t.id !== id);
         showFeedback('Transaksi berhasil dihapus!', true);
+        
+        // Simpan ke Local Storage setelah penghapusan
+        saveTransactionsToLocalStorage(); // <--- DITAMBAHKAN
+        
         renderTransactions();
     }
 }
@@ -170,6 +184,9 @@ function updateTransaction(id, updatedData) {
 
     transactions[index] = { ...transactions[index], ...updatedData };
     showFeedback('Transaksi berhasil diupdate!', true);
+    
+    // Simpan ke Local Storage setelah update
+    saveTransactionsToLocalStorage(); // <--- DITAMBAHKAN
 }
 
 function resetForm() {
@@ -188,14 +205,26 @@ function showFeedback(message, isSuccess) {
     setTimeout(() => msgEl.classList.add('hidden'), 3000);
 }
 
-function scrollToHistory() {
+function scrollTotory() {
     document.getElementById('transaction-history').scrollIntoView({ behavior: 'smooth' });
 }
 
 form.addEventListener('submit', addTransaction);
+
+// --- MODIFIKASI: MUAT DATA DARI LOCAL STORAGE SAAT HALAMAN DIMUAT ---
 document.addEventListener('DOMContentLoaded', () => {
- 
+    // 1. Muat data dari Local Storage
+    const savedTransactions = localStorage.getItem('transactions');
+    
+    // 2. Jika ada data tersimpan, parse kembali menjadi array dan masukkan ke variabel transactions
+    if (savedTransactions) {
+        transactions = JSON.parse(savedTransactions);
+    }
+    
+    // Set tanggal hari ini dan filter bulan saat ini
     document.getElementById('date').valueAsDate = new Date();
     filterMonthEl.value = new Date().getMonth();
+    
+    // Render transaksi yang sudah dimuat (baik dari storage atau array kosong jika belum ada)
     renderTransactions();
 });

@@ -230,8 +230,10 @@ select:focus {
 .filter-bar select {
     padding: 9px 12px;
     border-radius: 8px;
-    font-size: 14px;
-}
+    font-size: 14px; 
+     width: 160px;
+} 
+
 
 .transaction-list {
     display: flex;
