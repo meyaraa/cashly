@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CashLy - Personal Finance</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        
+        <header class="hero-section">
+            <div class="greeting">
+                <h1>Hi, Mayang</h1>
+                <p>Let's see where your money goes</p>
+            </div>
+            
+            <div class="banner">
+                <div class="banner-content">
+                    <h3>CashLy</h3>
+                    <p>Your financial journey starts here</p>
+                    <button class="btn-primary" onclick="scrollToHistory()">Transaction History</button>
+                    
+                </div>
+                <div>
+                    <img src="img/banner.png" alt="">
+                </div>
+            </div>
+        </header>
+
+        <main>
+            
+            <section class="dashboard-summary">
+                <div id="balance-card" class="summary-card balance-card">
+                    <h4>Current Balance</h4>
+                    <h2 id="current-balance">Rp 0</h2>
+                </div>
+                <div id="income-card" class="summary-card income-card">
+                    <h4>Total Income</h4>
+                    <h2 id="total-income">+Rp 0</h2>
+                </div>
+                <div id="expense-card" class="summary-card expense-card">
+                    <h4>Total Expenses</h4>
+                    <h2 id="total-expenses">-Rp 0</h2>
+                </div>
+            </section>
+
+            <section class="add-transaction-section">
+                <h3>Add Transaction</h3>
+                <form id="transaction-form" class="transaction-form">
+                    
+                    <div class="form-row">
+                       
+                        <div class="form-group radio-group">
+                            <label for="transaction-type"> Transaction Type</label>
+                            <label><input type="radio" name="type" value="income" checked>  Income</label>
+                            <label><input type="radio" name="type" value="expense">  Expenses</label>
+                        </div>
+                    </div>
+
+                    <div class="form-row grid-2">
+                        <div class="form-group">
+                            <label for="category">Category</label>
+                            <select id="category" required>
+                                <option value="">Pilih Kategori</option>
+                                <option value="Salary">Salary/Gaji</option>
+                                <option value="Investment">Investment/Investasi</option>
+                                <option value="Food">Food/Makanan</option>
+                                <option value="Transport">Transport/Transportasi</option>
+                                <option value="Bill">Bill/Tagihan</option>
+                                <option value="Other">Other/Lainnya</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="payment-method">Payment Method</label>
+                            <input type="text" id="payment-method" placeholder="Cash, Debit BNI, OVO" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row grid-2">
+                        <div class="form-group">
+                            <label for="amount">Amount</label>
+                            <input type="number" id="amount" min="1" placeholder="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="date">Date</label>
+                            <input type="date" id="date" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <input type="text" id="description" placeholder="Makan siang di kantin, Bonus project A">
+                    </div>
+
+                    <button type="submit" class="btn-submit">Submit</button>
+                    <div id="feedback-message" class="hidden"></div>
+                </form>
+            </section>
+
+            <section class="history-section" id="transaction-history">
+                <h3>Transaction History</h3>
+                
+                <div class="filter-bar">
+                    <select id="filter-type" onchange="renderTransactions()">
+                        <option value="all">All Transaction</option>
+                        <option value="income">Income Only</option>
+                        <option value="expense">Expenses Only</option>
+                    </select>
+                    <select id="filter-category" onchange="renderTransactions()">
+                        <option value="all">All Categories</option>
+                        <option value="Salary">Salary/Gaji</option>
+                        <option value="Food">Food/Makanan</option>
+                        <option value="Transport">Transport/Transportasi</option>
+                        <option value="Bill">Bill/Tagihan</option>
+                    </select>
+                    <select id="filter-month" onchange="renderTransactions()">
+                        <option value="all">All Month</option>
+                        <option value="0">Januari</option>
+                        <option value="1">Februari</option>
+                        <option value="2">Maret</option>
+                        <option value="10">November</option>
+                        <option value="11">Desember</option>
+                    </select>
+                </div>
+
+                <div id="history-list" class="transaction-list">
+                    </div>
+            </section>
+        </main>
+        
+        <footer>
+            <p>&copy; 2024 CashLy. Designed with HTML, CSS, and Vanilla JS.</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
