@@ -23,7 +23,7 @@ const CATEGORIES = {
         { value: 'Salary', text: 'Salary' },
         { value: 'Investment', text: 'Investment' },
         { value: 'Bonus', text: 'Bonus' },
-        { value: 'Other_Income', text: 'Other Income' }
+        { value: 'Other Income', text: 'Other Income' }
     ],
     expense: [
         { value: 'Food', text: 'Food' },
@@ -31,7 +31,7 @@ const CATEGORIES = {
         { value: 'Shopping', text: 'Shopping' },
         { value: 'Bill', text: 'Bill/Tagihan' },
         { value: 'Rent', text: 'Rent/Sewa' },
-        { value: 'Other_Expense', text: 'Other Expense' }
+        { value: 'Other Expense', text: 'Other Expense' }
     ]
 };
 
@@ -140,9 +140,10 @@ function addTransaction(e) {
             date,
             description
         };
-        transactions.push(newTransaction);
+        transactions.unshift(newTransaction); 
+        
         showFeedback('Transaksi berhasil ditambahkan!', true);
-        saveTransactionsToLocalStorage(); 
+        saveTransactionsToLocalStorage();
     }
     
     resetForm();

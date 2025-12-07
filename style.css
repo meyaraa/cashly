@@ -419,4 +419,16 @@ footer {
     .history-section {
         padding: 15px;
     }
+
+   
+.msg-success, .msg-error {
+    display: block; 
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+}
+
+.hidden {
+    display: none !important; 
+}
 }
