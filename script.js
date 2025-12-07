@@ -13,9 +13,29 @@ const filterCategoryEl = document.getElementById('filter-category');
 const filterMonthEl = document.getElementById('filter-month');
 const submitBtn = document.querySelector('.btn-submit');
 
-// --- FUNGSI BARU: MENYIMPAN KE LOCAL STORAGE ---
+const toggleBtn = document.getElementById('toggle-form-btn');
+const formContainer = document.getElementById('form-container'); 
+const categorySelect = document.getElementById('category');
+const typeRadios = document.querySelectorAll('input[name="type"]');
+
+const CATEGORIES = {
+    income: [
+        { value: 'Salary', text: 'Salary' },
+        { value: 'Investment', text: 'Investment' },
+        { value: 'Bonus', text: 'Bonus' },
+        { value: 'Other_Income', text: 'Other Income' }
+    ],
+    expense: [
+        { value: 'Food', text: 'Food' },
+        { value: 'Transport', text: 'Transport' },
+        { value: 'Shopping', text: 'Shopping' },
+        { value: 'Bill', text: 'Bill/Tagihan' },
+        { value: 'Rent', text: 'Rent/Sewa' },
+        { value: 'Other_Expense', text: 'Other Expense' }
+    ]
+};
+
 function saveTransactionsToLocalStorage() {
-    // Menyimpan array 'transactions' ke Local Storage setelah dikonversi ke string JSON
     localStorage.setItem('transactions', JSON.stringify(transactions));
 }
 
@@ -25,6 +45,72 @@ const formatRupiah = (number) => {
         currency: 'IDR',
         minimumFractionDigits: 0
     }).format(number);
+}
+
+function toggleForm() {
+    formContainer.classList.toggle('hidden-form');
+    const isHidden = formContainer.classList.contains('hidden-form');
+    
+    toggleBtn.innerText = isHidden ? '+ Add New Transaction' : '- Close Form';
+    
+    toggleBtn.classList.toggle('btn-toggle-form--close');
+    
+    if (!isHidden) {
+        window.scrollTo({ top: toggleBtn.offsetTop, behavior: 'smooth' });
+    }
+}
+
+function updateCategoryOptions(initialLoad = false, currentCategory = null) {
+    let selectedType = 'income';
+    if (!initialLoad) {
+        selectedType = document.querySelector('input[name="type"]:checked').value;
+    }
+    
+    const optionsArray = CATEGORIES[selectedType];
+    
+    categorySelect.innerHTML = '<option value="">Choose Categories</option>';
+    
+    optionsArray.forEach(cat => {
+        const option = document.createElement('option');
+        option.value = cat.value;
+        option.innerText = cat.text;
+        categorySelect.appendChild(option);
+    });
+
+    if (currentCategory) {
+        categorySelect.value = currentCategory;
+    }
+}
+
+function updateFilterCategoryOptions() {
+    const selectedFilterType = filterTypeEl.value; 
+    
+    filterCategoryEl.innerHTML = '<option value="all">All Categories</option>';
+    
+    let categoriesToDisplay = [];
+
+    if (selectedFilterType === 'income') {
+        categoriesToDisplay = CATEGORIES.income;
+    } else if (selectedFilterType === 'expense') {
+        categoriesToDisplay = CATEGORIES.expense;
+    } else {
+        
+        const allCategoriesMap = new Map();
+        
+        CATEGORIES.income.forEach(cat => allCategoriesMap.set(cat.value, cat));
+        CATEGORIES.expense.forEach(cat => allCategoriesMap.set(cat.value, cat));
+        
+        categoriesToDisplay = Array.from(allCategoriesMap.values());
+    }
+    
+    categoriesToDisplay.forEach(cat => {
+        const option = document.createElement('option');
+        option.value = cat.value;
+        option.innerText = cat.text;
+        filterCategoryEl.appendChild(option);
+    });
+
+    renderTransactions(); 
 }
 
 function addTransaction(e) {
@@ -37,15 +123,12 @@ function addTransaction(e) {
     const date = document.getElementById('date').value;
     const description = document.getElementById('description').value || '-';
 
-    // Validasi
     if (!category || !paymentMethod || !amount || !date || amount <= 0) {
         showFeedback('Semua field wajib diisi dan Nominal harus positif.', false);
         return;
     }
 
-    
     if (isEditing) {
-        // updateTransaction sekarang memanggil saveTransactionsToLocalStorage di dalamnya
         updateTransaction(currentEditId, { type, category, paymentMethod, amount: +amount, date, description });
     } else {
         const newTransaction = {
@@ -59,8 +142,6 @@ function addTransaction(e) {
         };
         transactions.push(newTransaction);
         showFeedback('Transaksi berhasil ditambahkan!', true);
-        
-        // Simpan ke Local Storage setelah penambahan
         saveTransactionsToLocalStorage(); 
     }
     
@@ -78,7 +159,7 @@ function createTransactionCard(trans) {
     const amountClass = isExpense ? 'amount-expense' : 'amount-income';
     const borderClass = isExpense ? 'expense-border' : 'income-border';
 
-    const dateDisplay = new Date(trans.date).toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'});
+    const dateDisplay = new Date(trans.date).toLocaleDateString('en-US', {day: 'numeric', month: 'long', year: 'numeric'});
 
     const card = document.createElement('div');
     card.classList.add('transaction-card', borderClass);
@@ -86,16 +167,16 @@ function createTransactionCard(trans) {
 
     card.innerHTML = `
         <div class="details">
-            <h4>${trans.category}</h4>
+            <h4>${trans.category} - ${trans.paymentMethod} </h4>
             <p>${trans.description}</p>
-            <small>${dateDisplay}</small>
+            <small style="color:#4071A8;">${dateDisplay}</small>
         </div>
         <div class="amount-action-group">
             <span class="transaction-amount ${amountClass}">
                 ${sign} ${formatRupiah(trans.amount)}
             </span>
-            <button class="action-btn delete-btn" onclick="deleteTransaction(${trans.id})">🗑️</button>
-            <button class="action-btn edit-btn" onclick="prepareEdit(${trans.id})">✏️</button>
+            <button class="action-btn delete-btn" onclick="deleteTransaction(${trans.id})"><i class="fa-solid fa-trash-can"></i></button>
+            <button class="action-btn edit-btn" onclick="prepareEdit(${trans.id})"><i class="fa-solid fa-pen-to-square"></i></button>
         </div>
     `;
 
@@ -118,7 +199,6 @@ function updateSummary(filteredData) {
     expenseEl.innerText = `-${formatRupiah(expense)}`;
 }
 
-//Filter Data 
 function renderTransactions() {
     list.innerHTML = ''; 
     
@@ -131,12 +211,16 @@ function renderTransactions() {
         
         const typeMatch = typeFilter === 'all' || t.type === typeFilter;
         
-        const categoryMatch = categoryFilter === 'all' || t.category === categoryFilter;
-
         const transDate = new Date(t.date);
         const transMonth = transDate.getMonth();
-        const monthMatch = monthFilter === 'all' || (transMonth == monthFilter && transDate.getFullYear() == currentYear);
+        const monthMatch = monthFilter === 'all' || (Number(monthFilter) === transMonth && transDate.getFullYear() === currentYear);
         
+        let categoryMatch = categoryFilter === 'all' || t.category === categoryFilter;
+
+        if (typeFilter === 'all' && categoryFilter !== 'all') {
+
+        }
+
         return typeMatch && categoryMatch && monthMatch;
     });
 
@@ -145,26 +229,29 @@ function renderTransactions() {
     updateSummary(filteredTransactions);
 }
 
-// Delete
 function deleteTransaction(id) {
     if (confirm("Apakah Anda yakin ingin menghapus transaksi ini?")) {
         transactions = transactions.filter(t => t.id !== id);
         showFeedback('Transaksi berhasil dihapus!', true);
         
-        // Simpan ke Local Storage setelah penghapusan
-        saveTransactionsToLocalStorage(); // <--- DITAMBAHKAN
+        saveTransactionsToLocalStorage(); 
         
         renderTransactions();
     }
 }
 
-// Update data
 function prepareEdit(id) {
     const transaction = transactions.find(t => t.id === id);
     if (!transaction) return;
 
+    if (formContainer.classList.contains('hidden-form')) {
+        toggleForm();
+    }
+
     document.querySelector(`input[name="type"][value="${transaction.type}"]`).checked = true;
-    document.getElementById('category').value = transaction.category;
+    
+    updateCategoryOptions(false, transaction.category); 
+
     document.getElementById('payment-method').value = transaction.paymentMethod;
     document.getElementById('amount').value = transaction.amount;
     document.getElementById('date').value = transaction.date;
@@ -173,9 +260,8 @@ function prepareEdit(id) {
     isEditing = true;
     currentEditId = id;
     submitBtn.innerText = 'Update Transaction';
-    document.querySelector('.add-transaction-section h3').innerText = 'Edit Transaction';
 
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+   formContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function updateTransaction(id, updatedData) {
@@ -185,8 +271,7 @@ function updateTransaction(id, updatedData) {
     transactions[index] = { ...transactions[index], ...updatedData };
     showFeedback('Transaksi berhasil diupdate!', true);
     
-    // Simpan ke Local Storage setelah update
-    saveTransactionsToLocalStorage(); // <--- DITAMBAHKAN
+    saveTransactionsToLocalStorage(); 
 }
 
 function resetForm() {
@@ -194,8 +279,14 @@ function resetForm() {
     isEditing = false;
     currentEditId = null;
     submitBtn.innerText = 'Submit';
-    document.querySelector('.add-transaction-section h3').innerText = 'Add Transaction';
-    document.getElementById('date').valueAsDate = new Date(); // Set tanggal hari ini
+    
+    updateCategoryOptions(true); 
+    
+    if (!formContainer.classList.contains('hidden-form')) {
+        toggleForm(); 
+    }
+    
+    document.getElementById('date').valueAsDate = new Date(); 
 }
 
 function showFeedback(message, isSuccess) {
@@ -205,26 +296,36 @@ function showFeedback(message, isSuccess) {
     setTimeout(() => msgEl.classList.add('hidden'), 3000);
 }
 
-function scrollTotory() {
+function scrollToHistory() {
     document.getElementById('transaction-history').scrollIntoView({ behavior: 'smooth' });
 }
 
-form.addEventListener('submit', addTransaction);
 
-// --- MODIFIKASI: MUAT DATA DARI LOCAL STORAGE SAAT HALAMAN DIMUAT ---
+form.addEventListener('submit', addTransaction);
+toggleBtn.addEventListener('click', toggleForm); 
+
+typeRadios.forEach(radio => {
+    radio.addEventListener('change', () => updateCategoryOptions(false));
+});
+
+filterTypeEl.addEventListener('change', updateFilterCategoryOptions); 
+
+filterCategoryEl.addEventListener('change', renderTransactions); 
+filterMonthEl.addEventListener('change', renderTransactions); 
+
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Muat data dari Local Storage
     const savedTransactions = localStorage.getItem('transactions');
     
-    // 2. Jika ada data tersimpan, parse kembali menjadi array dan masukkan ke variabel transactions
     if (savedTransactions) {
         transactions = JSON.parse(savedTransactions);
     }
     
-    // Set tanggal hari ini dan filter bulan saat ini
     document.getElementById('date').valueAsDate = new Date();
     filterMonthEl.value = new Date().getMonth();
-    
-    // Render transaksi yang sudah dimuat (baik dari storage atau array kosong jika belum ada)
+
+    updateFilterCategoryOptions(); 
+
+    updateCategoryOptions(true); 
+
     renderTransactions();
 });

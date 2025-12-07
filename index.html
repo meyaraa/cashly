@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CashLy - Personal Finance</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
 </head>
 <body>
 
@@ -32,10 +33,7 @@
         <main>
             
             <section class="dashboard-summary">
-                <div id="balance-card" class="summary-card balance-card">
-                    <h4>Current Balance</h4>
-                    <h2 id="current-balance">Rp 0</h2>
-                </div>
+               
                 <div id="income-card" class="summary-card income-card">
                     <h4>Total Income</h4>
                     <h2 id="total-income">+Rp 0</h2>
@@ -44,66 +42,73 @@
                     <h4>Total Expenses</h4>
                     <h2 id="total-expenses">-Rp 0</h2>
                 </div>
+                 <div id="balance-card" class="summary-card balance-card">
+                    <h4>Current Balance</h4>
+                    <h2 id="current-balance">Rp 0</h2>
+                </div>
+                
             </section>
 
             <section class="add-transaction-section">
-                <h3>Add Transaction</h3>
-                <form id="transaction-form" class="transaction-form">
-                    
-                    <div class="form-row">
-                       
-                        <div class="form-group radio-group">
-                            <label for="transaction-type"> Transaction Type</label>
-                            <label><input type="radio" name="type" value="income" checked>  Income</label>
-                            <label><input type="radio" name="type" value="expense">  Expenses</label>
-                        </div>
-                    </div>
+                <button id="toggle-form-btn" class="btn-toggle-form">
+                    + Add New Transaction 
+                </button>
 
-                    <div class="form-row grid-2">
-                        <div class="form-group">
-                            <label for="category">Category</label>
-                            <select id="category" required>
-                                <option value="">Choose Categories</option>
-                                <option value="Salary">Salary</option>
-                                <option value="Investment">Investment</option>
-                                <option value="Food">Food</option>
-                                <option value="Transport">Transport</option>
-                                <option value="Shopping">Shopping</option>
-                                <option value="Bill">Bill</option>
-                                <option value="Other">Other</option>
-                            </select>
+                <div id="form-container" class="form-container hidden-form">
+                    <form id="transaction-form" class="transaction-form">
+                        
+                        <div class="form-row">
+                            <div class="form-group radio-group">
+                                <label for="transaction-type"> Transaction Type</label>
+                                
+                                <label>
+                                    <input type="radio" name="type" value="income" checked onchange="updateCategoryOptions()">  Income
+                                </label>
+                                <label>
+                                    <input type="radio" name="type" value="expense" onchange="updateCategoryOptions()">  Expenses
+                                </label>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="payment-method">Payment Method</label>
-                            <select id="payment-method" required>
-                                <option value="">Choose Payment Method</option>
-                                <option value="Cash">Cash</option>
-                                <option value="Debit">Debit Card</option>
-                                <option value="E-Wallet">E-Wallet</option>
-                                <option value="Bank">Bank Transfer</option>
-                            </select>
-                        </div>
-                    </div>
 
-                    <div class="form-row grid-2">
-                        <div class="form-group">
-                            <label for="amount">Amount</label>
-                            <input type="number" id="amount" min="1" placeholder="0" required>
+                        <div class="form-row grid-2">
+                            <div class="form-group">
+                                <label for="category">Category</label>
+                                <select id="category" required>
+                                    <option value="">Choose Categories</option>
+                                    </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="payment-method">Payment Method</label>
+                                <select id="payment-method" required>
+                                    <option value="">Choose Payment Method</option>
+                                    <option value="Cash">Cash</option>
+                                    <option value="Debit">Debit Card</option>
+                                    <option value="E-Wallet">E-Wallet</option>
+                                    <option value="Bank">Bank Transfer</option>
+                                </select>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="date">Date</label>
-                            <input type="date" id="date" required>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="description">Description</label>
-                        <input type="text" id="description" placeholder="Makan siang di kantin, Bonus project A">
-                    </div>
 
-                    <button type="submit" class="btn-submit">Submit</button>
-                    <div id="feedback-message" class="hidden"></div>
-                </form>
+                        <div class="form-row grid-2">
+                            <div class="form-group">
+                                <label for="amount">Amount</label>
+                                <input type="number" id="amount" min="1" placeholder="0" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="date">Date</label>
+                                <input type="date" id="date" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="description">Description</label>
+                            <input type="text" id="description" placeholder="Lunch in the canteen, Bonus project A">
+                        </div>
+
+                        <button type="submit" class="btn-submit">Submit</button>
+                        <div id="feedback-message" class="hidden"></div>
+                    </form>
+                </div>
             </section>
 
             <section class="history-section" id="transaction-history">
@@ -124,19 +129,18 @@
                     </select>
                     <select id="filter-month" onchange="renderTransactions()">
                         <option value="all">All Month</option>
-                        <option value="0">Januari</option>
-                        <option value="1">Februari</option>
-                        <option value="2">Maret</option>
+                        <option value="0">January</option>
+                        <option value="1">February</option>
+                        <option value="2">March</option>
                         <option value="3">April</option>
-                        <option value="4">Mei</option>
-                        <option value="5">Juni</option>
-                        <option value="6">Maret</option>
-                        <option value="7">Juli</option>
-                        <option value="8">Agustus</option>
-                        <option value="9">September</option>
-                        <option value="10">Oktober</option>
-                        <option value="11">November</option>
-                        <option value="12">Desember</option>
+                        <option value="4">May</option>
+                        <option value="5">June</option>
+                        <option value="6">July</option>
+                        <option value="7">August</option>
+                        <option value="8">September</option>
+                        <option value="9">October</option>
+                        <option value="10">November</option>
+                        <option value="11">December</option>
                     </select>
                 </div>
 
@@ -146,7 +150,7 @@
         </main>
         
         <footer>
-            <p>&copy; 2024 CashLy. Designed with HTML, CSS, and Vanilla JS.</p>
+            <p>&copy; 2025 CashLy by Mayang </p>
         </footer>
     </div>
 
